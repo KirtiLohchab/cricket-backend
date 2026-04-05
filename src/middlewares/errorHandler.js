@@ -65,7 +65,8 @@ const globalErrorHandler = (err, req, res, next) => {
   // Translate known library errors into operational AppErrors
   if (err.code === "P2002") error = handlePrismaUniqueConstraint();
   if (err.code === "P2025") error = handlePrismaNotFound();
-  if (err.name === "PrismaClientValidationError") error = handlePrismaValidation(err);
+  if (err.name === "PrismaClientValidationError")
+    error = handlePrismaValidation(err);
   if (err.name === "JsonWebTokenError") error = handleJWTError();
   if (err.name === "TokenExpiredError") error = handleJWTExpiredError();
 

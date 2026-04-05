@@ -51,7 +51,9 @@ export const register = catchAsync(async (req, res, next) => {
   // ── Business logic ───────────────────────────────────────────────────────────
   const existingUser = await findUserByEmail(email.toLowerCase().trim());
   if (existingUser) {
-    return next(new AppError("An account with this email already exists.", 409));
+    return next(
+      new AppError("An account with this email already exists.", 409),
+    );
   }
 
   const hashedPassword = await bcrypt.hash(password, 12);

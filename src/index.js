@@ -33,7 +33,8 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     status: "fail",
-    message: "Too many requests from this IP, please try again after 15 minutes.",
+    message:
+      "Too many requests from this IP, please try again after 15 minutes.",
   },
 });
 
@@ -54,7 +55,12 @@ app.use("/api/auth", authLimiter, authRoutes);
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 
 app.all("*", (req, _res, next) => {
-  next(new AppError(`Cannot find ${req.method} ${req.originalUrl} on this server.`, 404));
+  next(
+    new AppError(
+      `Cannot find ${req.method} ${req.originalUrl} on this server.`,
+      404,
+    ),
+  );
 });
 
 // ─── Global error handler ─────────────────────────────────────────────────────
@@ -64,7 +70,9 @@ app.use(globalErrorHandler);
 // ─── Server start ─────────────────────────────────────────────────────────────
 
 const server = app.listen(PORT, () => {
-  console.log(`[server] Running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
+  console.log(
+    `[server] Running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`,
+  );
 });
 
 // ─── Graceful shutdown ────────────────────────────────────────────────────────
