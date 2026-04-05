@@ -63,3 +63,5 @@ seeders/*.js
 # Misc
 *.tgz
 *.bak
+
+*-lock.json
