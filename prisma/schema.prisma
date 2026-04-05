@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AgeCategoryEnum {
+  UNDER_16
+  OPEN_AGE
+}
+
+enum PlayerRoleEnum {
+  BATSMAN
+  BOWLER
+  ALL_ROUNDER
+  WICKET_KEEPER
+}
+
+enum OTPMethodEnum {
+  EMAIL
+  PHONE
+}
+
+enum OTPStatusEnum {
+  PENDING
+  VERIFIED
+  EXPIRED
+}
+
+model User {
+  id                String          @id @default(cuid())
+  phone             String?         @unique
+  email             String?         @unique
+  password          String?
+  isPhoneVerified   Boolean         @default(false)
+  isEmailVerified   Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  // Relations
+  otps              OTP[]
+  playerProfile     PlayerProfile?
+  
+  @@map("users")
+}
+
+model OTP {
+  id                String          @id @default(cuid())
+  userId            String?
+  phone             String?
+  email             String?
+  code              String
+  method            OTPMethodEnum   @default(EMAIL)
+  status            OTPStatusEnum   @default(PENDING)
+  attempts          Int             @default(0)
+  expiresAt         DateTime
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  // Relations
+  user              User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("otps")
+}
+
+model State {
+  id                String          @id @default(cuid())
+  name              String          @unique
+  code              String?         @unique
+  createdAt         DateTime        @default(now())
+  
+  // Relations
+  districts         District[]
+  playerProfiles    PlayerProfile[]
+  trialDistricts    PlayerProfile[] @relation("trialState")
+  
+  @@map("states")
+}
+
+model District {
+  id                String          @id @default(cuid())
+  name              String
+  stateId           String
+  code              String?
+  createdAt         DateTime        @default(now())
+  
+  // Relations
+  state             State           @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  playerProfiles    PlayerProfile[]
+  trialPlayerProfiles PlayerProfile[] @relation("trialDistrict")
+  
+  @@unique([stateId, name])
+  @@map("districts")
+}
+
+model PlayerProfile {
+  id                String          @id @default(cuid())
+  userId            String          @unique
+  firstName         String
+  lastName          String
+  fatherName        String
+  motherName        String
+  dateOfBirth       DateTime
+  ageCategory       AgeCategoryEnum
+  stateId           String
+  districtId        String
+  city              String
+  playerRole        PlayerRoleEnum
+  trialStateId      String
+  trialDistrictId   String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  
+  // Relations
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  state             State           @relation(fields: [stateId], references: [id])
+  district          District        @relation(fields: [districtId], references: [id])
+  trialState        State           @relation("trialState", fields: [trialStateId], references: [id])
+  trialDistrict     District        @relation("trialDistrict", fields: [trialDistrictId], references: [id])
+  
+  @@map("player_profiles")
+}
+
+model AuditLog {
+  id                String          @id @default(cuid())
+  userId            String?
+  action            String
+  details           String?
+  ipAddress         String?
+  userAgent         String?
+  createdAt         DateTime        @default(now())
+  
+  @@map("audit_logs")
+}
